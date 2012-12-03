@@ -45,16 +45,16 @@ app.delete('/api/:domain', checkAuth, function(req, res) {
 
 // now handle fetches of well-known documents
 app.use(function(req, res, next) {
-  console.log('host:', req.headers.host);
   if (req.headers.host && req.headers.host.length > HOSTNAME.length) {
-    var domain = req.headers.host.split('.');
+    var domain = req.headers.host.split('.')[0];
     var data = db.getDomain(domain);
     if (data) {
-      res.write(data.wellKnown);
-    } else {
-      next();
+      res.setHeader('Content-Type', 'application/json');
+      return res.end(data.wellKnown);
     }
   }
+  // not found
+  next();
 });
 
 // handle starting from the command line or the test harness

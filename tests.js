@@ -47,7 +47,6 @@ describe('dynamic domain', function() {
         host: "dne.testidp.org"
       }
     }, function(err, res, body) {
-      console.log(body);
       should.not.exist(err);
       res.statusCode.should.equal(404);
       done();
@@ -62,7 +61,8 @@ describe('dynamic domain', function() {
         host: myDomain + ".testidp.org"
       }
     }, function(err, res, body) {
-      res.statusCode.should.equal(200);
+      should.exist(res.headers['content-type']);
+      (res.headers['content-type']).should.equal('application/json');
       done();
     });
   });

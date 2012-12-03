@@ -16,6 +16,6 @@
   },
   "scripts": {
     "start": "node webserver.js",
-    "test": "mocha --globals msg -R spec tests.js"
+    "test": "mocha -R spec tests.js"
   }
 }
