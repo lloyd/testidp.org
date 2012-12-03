@@ -1,0 +1,21 @@
+{
+  "name": "testidp.org",
+  "description": "A programatically configurable primary IdP for testing of Mozilla Persona.",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "express": "2.5.11",
+    "winston": "0.6.2"
+  },
+  "devDependencies": {
+    "awsbox": "0.3.3",
+    "should": "1.2.1",
+    "mocha": "1.7.3",
+    "jshint": "0.9.1",
+    "request": "2.12.0"
+  },
+  "scripts": {
+    "start": "node webserver.js",
+    "test": "mocha --globals msg -R spec tests.js"
+  }
+}
