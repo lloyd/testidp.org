@@ -23,7 +23,7 @@ describe('the server', function() {
   });
 });
 
-var myDomain;
+var myDomain, myPassword;
 
 describe('GET /api/domain', function() {
   it('should return a new randomly generated domain', function(done) {
@@ -32,7 +32,9 @@ describe('GET /api/domain', function() {
       res.statusCode.should.equal(200);
       body.ok.should.equal(true);
       body.domain.should.be.a('string');
+      body.password.should.be.a('string');
       myDomain = body.domain;
+      myPassword = body.password;
       done();
     });
   });
@@ -63,6 +65,63 @@ describe('dynamic domain', function() {
     }, function(err, res, body) {
       should.exist(res.headers['content-type']);
       (res.headers['content-type']).should.equal('application/json');
+      done();
+    });
+  });
+});
+
+describe('domain deletion', function() {
+  it('should return 404 when the domain doesn\'t exist', function(done) {
+    request.del({
+      url: serverURL + 'api/dne',
+      json: true,
+    }, function(err, res, body) {
+      should.not.exist(err);
+      res.statusCode.should.equal(404);
+      body.ok.should.equal(false);
+      done();
+    });
+  });
+
+  it('should return not authorized when the client isn\'t', function(done) {
+    request.del({
+      url: serverURL + 'api/' + myDomain,
+      json: true,
+    }, function(err, res, body) {
+      should.not.exist(err);
+      res.statusCode.should.equal(401);
+      body.ok.should.equal(false);
+      done();
+    });
+  });
+
+  it('should fail when the password is wrong', function(done) {
+    request.del({
+      url: serverURL + 'api/' + myDomain,
+      json: true,
+      headers: {
+        'x-password': "bogus"
+      }
+    }, function(err, res, body) {
+      should.not.exist(err);
+      res.statusCode.should.equal(401);
+      body.ok.should.equal(false);
+      body.why.should.include('incorrect password');
+      done();
+    });
+  });
+
+  it('should succeed when all is copasetic', function(done) {
+    request.del({
+      url: serverURL + 'api/' + myDomain,
+      json: true,
+      headers: {
+        'x-password': myPassword
+      }
+    }, function(err, res, body) {
+      should.not.exist(err);
+      res.statusCode.should.equal(200);
+      body.ok.should.equal(true);
       done();
     });
   });
