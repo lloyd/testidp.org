@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>persona test IdP</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <!-- Le styles -->
+    <link href="css/bootstrap.css" rel="stylesheet">
+    <style type="text/css">
+      body {
+        padding-top: 20px;
+        padding-bottom: 40px;
+      }
+
+      /* Custom container */
+      .container-narrow {
+        margin: 0 auto;
+        max-width: 700px;
+      }
+      .container-narrow > hr {
+        margin: 30px 0;
+      }
+
+      /* Main marketing message and sign up button */
+      .jumbotron {
+        margin: 60px 0;
+        text-align: center;
+      }
+      .jumbotron h1 {
+        font-size: 72px;
+        line-height: 1;
+      }
+      .jumbotron .btn {
+        font-size: 21px;
+        padding: 14px 24px;
+      }
+
+      /* Supporting marketing content */
+      .marketing {
+        margin: 60px 0;
+      }
+      .marketing p + h4 {
+        margin-top: 28px;
+      }
+    </style>
+    <link href="css/bootstrap-responsive.css" rel="stylesheet">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <link rel="shortcut icon" href="ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="ico/apple-touch-icon-57-precomposed.png">
+  </head>
+
+  <body>
+
+    <div class="container-narrow">
+
+      <div class="masthead">
+        <ul class="nav nav-pills pull-right">
+          <li class="active"><a href="#">Overview</a></li>
+          <li><a href="#">Interactive</a></li>
+          <li><a href="https://github.com/lloyd/testidp.org">Github</a></li>
+        </ul>
+        <h3 class="muted">testidp.org</h3>
+      </div>
+
+      <hr>
+
+      <div class="jumbotron">
+        <p class="lead">
+          This is tool for developers and QA of <a href="https://persona.org">Mozilla Persona</a>.
+          It allows you to build ephemeral Persona Identity Providers that you configure
+          via this website, or a RESTful API.
+        </p>
+        <a class="btn btn-large btn-success" href="#">Build an IdP!</a>
+      </div>
+
+      <hr>
+
+      <div class="row-fluid marketing">
+        <div class="span6">
+          <h4>Create...</h4>
+          <p>Create your own IDP with an HTTP request:
+            <br><code>
+              GET /api/domain
+            </code>
+          </p>
+
+          <h4>Ready!</h4>
+          <p>
+            Everything you need is created for you, a <b>keypair</b>, <b>authentication</b> and <b>provisioning</b> pages,
+            the works!
+          </p>
+
+          <h4>Change...</h4>
+          <p>You can change the .well-known file:</p>
+          <code>PUT /api/:domain/.well-known</code><br>
+          <code>X-Password: &lt;password from /api/domain&gt;</code><br>
+          <code>&nbsp;</code><br>
+          <code>{ "my": "new .well-known file" }</code>
+         </pre></code>
+        </div>
+
+        <div class="span6">
+          <h4>Configure</h4>
+          <p>Want your .well-known to have special headers?</p>
+          <code>PUT /api/:domain/headers</code><br>
+          <code>X-Password: &lt;password from /api/domain&gt;</code><br>
+          <code>&nbsp;</code><br>
+          <code>{ "cache-control": "public, max-age=100000" }</code>
+
+          <h4>Choose...</h4>
+          <p>You can choose to either have your IdP treat all users as authenticated using <code>/noauth/auth.html</code>.  Or
+            always require the user to view an "authentication" page using <code>/click/auth.html</code>.
+          </p>
+
+          <h4>Clean up!</h4>
+          <code>DELETE /api/:domain</code><br>
+          <code>X-Password: &lt;password from /api/domain&gt;</code><br>
+        </div>
+      </div>
+
+      <hr>
+
+      <div class="footer">
+        <p>&copy; Company 2012</p>
+      </div>
+
+    </div> <!-- /container -->
+
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+  </body>
+</html>
