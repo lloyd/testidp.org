@@ -12,7 +12,7 @@ jwcrypto = require('jwcrypto');
 var port = -1;
 var serverURL = null;
 
-describe('the server', function() {
+describe('The server', function() {
   it('should start up', function(done) {
     server(function(err, p) {
       should.not.exist(err);
@@ -41,7 +41,7 @@ describe('GET /api/domain', function() {
   });
 });
 
-describe('domain deletion', function() {
+describe('DELETE /api/:domain', function() {
   it('should return 404 when the domain doesn\'t exist', function(done) {
     request.del({
       url: serverURL + 'api/dne',
@@ -98,9 +98,7 @@ describe('domain deletion', function() {
   });
 });
 
-var pubKey;
-
-describe('.well-known/browserid', function() {
+describe('GET .well-known/browserid', function() {
   it('should get set up for a new domain', function(done) {
     request({ url: serverURL + 'api/domain', json: true }, function(err, res, body) {
       should.not.exist(err);
@@ -134,17 +132,123 @@ describe('.well-known/browserid', function() {
     }, function(err, res, body) {
       should.exist(res.headers['content-type']);
       res.headers['content-type'].should.equal('application/json');
+      should.exist(res.headers['cache-control']);
+      res.headers['cache-control'].should.equal('no-cache');
       should.exist(res.body.authentication);
       res.body.authentication.should.be.a('string');
       should.exist(res.body.provisioning);
       res.body.provisioning.should.be.a('string');
       res.body['public-key'].should.be.a('object');
       // can we parse the public key?
+      var pubKey;
       (function() {
         pubKey = jwcrypto.loadPublicKeyFromObject(res.body['public-key']);
       }).should.not.throw();
       should.exist(pubKey);
       pubKey.should.be.a('object');
+      done();
+    });
+  });
+});
+
+describe('PUT /api/:domain/well-known', function() {
+  it('should fail without proper creds', function(done) {
+    request.put({
+      url: serverURL + 'api/' + myDomain + '/well-known',
+      json: true,
+      body: JSON.stringify({
+        bogus: true
+      })
+    }, function(err, res, body) {
+      res.statusCode.should.equal(401);
+      res.body.ok.should.equal(false);
+      res.body.why.should.include('provide your password');
+      done();
+    });
+  });
+
+  it('should succeed with proper creds', function(done) {
+    request.put({
+      url: serverURL + 'api/' + myDomain + '/well-known',
+      json: true,
+      body: {
+        bogus: true
+      },
+      headers: {
+        'x-password': myPassword
+      }
+    }, function(err, res, body) {
+      res.statusCode.should.equal(200);
+      res.body.ok.should.equal(true);
+      done();
+    });
+  });
+
+  it('should return what we sent', function(done) {
+    request({
+      url: serverURL + '.well-known/browserid',
+      json: true,
+      headers: {
+        host: myDomain + ".testidp.org"
+      }
+    }, function(err, res, body) {
+      should.exist(res.headers['content-type']);
+      res.headers['content-type'].should.equal('application/json');
+      should.exist(res.body.bogus);
+      res.body.bogus.should.equal(true);
+      done();
+    });
+  });
+});
+
+describe('PUT /api/:domain/headers', function() {
+  it('should fail without proper creds', function(done) {
+    request.put({
+      url: serverURL + 'api/' + myDomain + '/headers',
+      json: true,
+      body: JSON.stringify({
+        bogus: true
+      })
+    }, function(err, res, body) {
+      res.statusCode.should.equal(401);
+      res.body.ok.should.equal(false);
+      res.body.why.should.include('provide your password');
+      done();
+    });
+  });
+
+  it('should succeed with proper creds', function(done) {
+    request.put({
+      url: serverURL + 'api/' + myDomain + '/headers',
+      json: true,
+      body: {
+        "X-Foo": "Bar",
+        "cache-control": "public, max-age=1000000"
+      },
+      headers: {
+        'x-password': myPassword
+      }
+    }, function(err, res, body) {
+      res.statusCode.should.equal(200);
+      res.body.ok.should.equal(true);
+      done();
+    });
+  });
+
+  it('should return what we sent', function(done) {
+    request({
+      url: serverURL + '.well-known/browserid',
+      json: true,
+      headers: {
+        host: myDomain + ".testidp.org"
+      }
+    }, function(err, res, body) {
+      should.exist(res.headers['content-type']);
+      res.headers['content-type'].should.equal('application/json');
+      should.exist(res.headers['x-foo']);
+      res.headers['x-foo'].should.equal('Bar');
+      should.exist(res.headers['cache-control']);
+      res.headers['cache-control'].should.include('public');
       done();
     });
   });

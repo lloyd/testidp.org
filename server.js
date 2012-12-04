@@ -14,6 +14,20 @@ winston.handleExceptions(new winston.transports.Console({ colorize: true, json: 
 
 var app = express.createServer();
 
+// limit post bodies to 10kb
+app.use(express.limit("10kb"));
+
+// read the whole body before passing on to the next middleware
+app.use(function(req, res, next) {
+  var buf = '';
+  req.setEncoding('utf8');
+  req.on('data', function(chunk) { buf += chunk; });
+  req.on('end', function(chunk) {
+    req.body = buf;
+    next();
+  });
+});
+
 const HOSTNAME = process.env.HOSTNAME || 'testidp.org';
 
 // setup logging (except when we're testing)
@@ -40,19 +54,28 @@ app.use(function(req, res, next) {
 });
 
 function checkAuth(req, res, next) {
+  if (!req.domain) {
+    res.fail("internal error, domain should be populated", 500);
+  } else if (!req.headers['x-password']) {
+    res.fail("provide your password in the X-Password header", 401);
+  } else if (req.headers['x-password'] !== req.domain.pass) {
+    res.fail("incorrect password", 401);
+  } else {
+    next();
+  }
+}
+
+function withDomain(req, res, next) {
   db.getDomain(req.params.domain, function(err, record) {
     if (err) {
       res.fail("database error: " + err);
     } else if (!record) {
       res.fail("no such domain", 404);
-    } else if (!req.headers['x-password']) {
-      res.fail("provide your password in the X-Password header", 401);
-    } else if (req.headers['x-password'] !== record.pass) {
-      res.fail("incorrect password", 401);
     } else {
+      req.domain = record;
       next();
     }
-  });
+  })
 }
 
 app.get('/api/domain', function(req, res) {
@@ -72,11 +95,35 @@ app.get('/api/domain', function(req, res) {
     });
 });
 
-app.put('/api/:domain/well-known', checkAuth, function(req, res) {
-  res.json({ok: false, why: "not implemented" }, 500);
+app.put('/api/:domain/well-known', withDomain, checkAuth, function(req, res) {
+  req.domain.wellKnown = req.body;
+  res.ok();
 });
 
-app.delete('/api/:domain', checkAuth, function(req, res) {
+app.put('/api/:domain/headers', withDomain, checkAuth, function(req, res) {
+  var kv = null;
+  try {
+    kv = JSON.parse(req.body);
+    if (typeof kv != 'object') throw "must be object";
+    Object.keys(kv).forEach(function(k) {
+      if (typeof kv[k] !== 'string') throw "values must be strings";
+    });
+    Object.keys(kv).forEach(function(k) {
+      var v = kv[k];
+      k = k.toLowerCase(); // < normalize
+      if (v === undefined) {
+        delete req.domain.headers[k];
+      } else {
+        req.domain.headers[k] = v;
+      }
+    });
+    res.ok();
+  } catch(e) {
+    return res.fail("malformed request: " + e, 400);
+  }
+});
+
+app.delete('/api/:domain', withDomain, checkAuth, function(req, res) {
   db.deleteDomain(req.params.domain, function(err) {
     if (err) res.fail(err, 500);
     else res.ok();
@@ -90,6 +137,10 @@ app.use(function(req, res, next) {
     db.getDomain(domain, function(err, data) {
       if (data) {
         res.setHeader('Content-Type', 'application/json');
+        res.setHeader('Cache-Control', 'no-cache');
+        Object.keys(data.headers).forEach(function(k) {
+          res.setHeader(k, data.headers[k]);
+        });
         res.end(data.wellKnown);
       } else {
         next();
