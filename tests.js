@@ -6,7 +6,8 @@ should = require('should'),
 http = require('http'),
 net = require('net'),
 server = require('./server.js'),
-request = require('request');
+request = require('request'),
+jwcrypto = require('jwcrypto');
 
 var port = -1;
 var serverURL = null;
@@ -35,36 +36,6 @@ describe('GET /api/domain', function() {
       body.password.should.be.a('string');
       myDomain = body.domain;
       myPassword = body.password;
-      done();
-    });
-  });
-});
-
-describe('dynamic domain', function() {
-  it('should return 404 when the domain doesn\'t exist', function(done) {
-    request({
-      url: serverURL + '.well-known/browserid',
-      json: true,
-      headers: {
-        host: "dne.testidp.org"
-      }
-    }, function(err, res, body) {
-      should.not.exist(err);
-      res.statusCode.should.equal(404);
-      done();
-    });
-  });
-
-  it('should return a valid default document when the domain does exist', function(done) {
-    request({
-      url: serverURL + '.well-known/browserid',
-      json: true,
-      headers: {
-        host: myDomain + ".testidp.org"
-      }
-    }, function(err, res, body) {
-      should.exist(res.headers['content-type']);
-      (res.headers['content-type']).should.equal('application/json');
       done();
     });
   });
@@ -127,3 +98,54 @@ describe('domain deletion', function() {
   });
 });
 
+var pubKey;
+
+describe('.well-known/browserid', function() {
+  it('should get set up for a new domain', function(done) {
+    request({ url: serverURL + 'api/domain', json: true }, function(err, res, body) {
+      should.not.exist(err);
+      myDomain = body.domain;
+      myPassword = body.password;
+      done();
+    });
+  });
+
+  it('should return 404 when the domain doesn\'t exist', function(done) {
+    request({
+      url: serverURL + '.well-known/browserid',
+      json: true,
+      headers: {
+        host: "dne.testidp.org"
+      }
+    }, function(err, res, body) {
+      should.not.exist(err);
+      res.statusCode.should.equal(404);
+      done();
+    });
+  });
+
+  it('should return a valid default document when the domain does exist', function(done) {
+    request({
+      url: serverURL + '.well-known/browserid',
+      json: true,
+      headers: {
+        host: myDomain + ".testidp.org"
+      }
+    }, function(err, res, body) {
+      should.exist(res.headers['content-type']);
+      res.headers['content-type'].should.equal('application/json');
+      should.exist(res.body.authentication);
+      res.body.authentication.should.be.a('string');
+      should.exist(res.body.provisioning);
+      res.body.provisioning.should.be.a('string');
+      res.body['public-key'].should.be.a('object');
+      // can we parse the public key?
+      (function() {
+        pubKey = jwcrypto.loadPublicKeyFromObject(res.body['public-key']);
+      }).should.not.throw();
+      should.exist(pubKey);
+      pubKey.should.be.a('object');
+      done();
+    });
+  });
+});

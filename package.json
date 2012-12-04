@@ -5,7 +5,9 @@
   "private": true,
   "dependencies": {
     "express": "2.5.11",
-    "winston": "0.6.2"
+    "winston": "0.6.2",
+    "jwcrypto": "0.4.2",
+    "seq": "0.3.5"
   },
   "devDependencies": {
     "awsbox": "0.3.3",

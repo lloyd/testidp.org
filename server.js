@@ -2,7 +2,10 @@
 
 var express = require('express'),
     winston = require('winston'),
-         db = require('./lib/db.js');
+         db = require('./lib/db.js'),
+     crypto = require('./lib/crypto.js')
+        Seq = require('seq'),
+  wellKnown = require('./lib/wellknown.js');
 
 /*
 winston.exitOnError = false;
@@ -53,9 +56,20 @@ function checkAuth(req, res, next) {
 }
 
 app.get('/api/domain', function(req, res) {
-  var details = db.newDomain();
-  details.ok = true;
-  res.json(details, 200);
+  Seq()
+    .seq(function() {
+      // generate a keypair for the domain
+      crypto.genKeyPair(this);
+    }).flatten()
+    .seq(function(keyPair) {
+      db.newDomain(keyPair, wellKnown.generate(keyPair.publicKey), this);
+    })
+    .seq(function(details) {
+      details.ok = true;
+      res.json(details, 200);
+    }).catch(function(err) {
+      return res.fail("failed to create domain: " + err);
+    });
 });
 
 app.put('/api/:domain/well-known', checkAuth, function(req, res) {
