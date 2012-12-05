@@ -172,7 +172,7 @@ app.post('/auth/certify', function (req, res) {
 
     var exp = new Date();
     exp.setSeconds(exp.getSeconds() + params.duration);
-
+    record.domain = domain;
     crypto.certify(record, params.email, params.publicKey, exp, function (err, cert) {
       if (err) {
         res.send(err, 500);
