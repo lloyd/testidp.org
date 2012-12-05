@@ -3,7 +3,7 @@
 var express = require('express'),
     winston = require('winston'),
          db = require('./lib/db.js'),
-     crypto = require('./lib/crypto.js')
+     crypto = require('./lib/crypto.js'),
         Seq = require('seq'),
   wellKnown = require('./lib/wellknown.js');
 
@@ -49,7 +49,7 @@ app.use(function(req, res, next) {
   };
   res.ok = function() {
     this.json({ ok: true }, 200);
-  }
+  };
   next();
 });
 
@@ -75,7 +75,7 @@ function withDomain(req, res, next) {
       req.domain = record;
       next();
     }
-  })
+  });
 }
 
 app.get('/api/domain', function(req, res) {
@@ -104,7 +104,7 @@ app.put('/api/:domain/headers', withDomain, checkAuth, function(req, res) {
   var kv = null;
   try {
     kv = JSON.parse(req.body);
-    if (typeof kv != 'object') throw "must be object";
+    if (typeof kv !== 'object') throw "must be object";
     Object.keys(kv).forEach(function(k) {
       if (typeof kv[k] !== 'string') throw "values must be strings";
     });
@@ -158,7 +158,7 @@ app.use(express.static(__dirname + "/idps"));
 
 // handle starting from the command line or the test harness
 if (process.argv[1] === __filename) {
-  app.listen(process.env['PORT'] || 8080);
+  app.listen(process.env.PORT || 8080);
 } else {
   module.exports = function(cb) {
     app.listen(0, function(err) {
