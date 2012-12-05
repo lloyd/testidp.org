@@ -95,7 +95,7 @@ app.get('/api/domain', function(req, res) {
     });
 });
 
-app.put('/api/:domain/well-known', withDomain, checkAuth, function(req, res) {
+app.put('/api/:domain/\.?well-known', withDomain, checkAuth, function(req, res) {
   req.domain.wellKnown = req.body;
   res.ok();
 });

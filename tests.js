@@ -184,6 +184,23 @@ describe('PUT /api/:domain/well-known', function() {
     });
   });
 
+  it('should still succeed if the user adds a dot', function(done) {
+    request.put({
+      url: serverURL + 'api/' + myDomain + '/.well-known',
+      json: true,
+      body: {
+        bogus: true
+      },
+      headers: {
+        'x-password': myPassword
+      }
+    }, function(err, res, body) {
+      res.statusCode.should.equal(200);
+      res.body.ok.should.equal(true);
+      done();
+    });
+  });
+
   it('should return what we sent', function(done) {
     request({
       url: serverURL + '.well-known/browserid',
