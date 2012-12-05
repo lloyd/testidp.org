@@ -132,6 +132,7 @@ app.delete('/api/:domain', withDomain, checkAuth, function(req, res) {
 
 // now handle fetches of well-known documents
 app.use(function(req, res, next) {
+  if ('/.well-known/browserid' !== req.path) return next();
   if (req.headers.host && req.headers.host.length > HOSTNAME.length) {
     var domain = req.headers.host.split('.')[0];
     db.getDomain(domain, function(err, data) {
