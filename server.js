@@ -153,6 +153,7 @@ app.use(function(req, res, next) {
 });
 
 app.use(express.static(__dirname + "/website"));
+app.use(express.static(__dirname + "/idps"));
 
 // handle starting from the command line or the test harness
 if (process.argv[1] === __filename) {
