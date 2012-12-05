@@ -4,6 +4,7 @@ var express = require('express'),
     winston = require('winston'),
          db = require('./lib/db.js'),
      crypto = require('./lib/crypto.js'),
+         qs = require('qs'),
         Seq = require('seq'),
   wellKnown = require('./lib/wellknown.js');
 
@@ -152,6 +153,35 @@ app.use(function(req, res, next) {
     next();
   }
 });
+
+app.post('/auth/certify', function (req, res) {
+  var params = qs.parse(req.body);
+  if (!params.email ||
+      !params.publicKey ||
+      !params.duration) {
+    return res.send(400);
+  }
+
+  var domain = params.email.replace(/[^@]*@/, '');
+  db.getDomain(domain.split('.')[0], function (err, record) {
+    if (!!err) {
+      return res.send(err, 400);
+    } else if (!record) {
+      return res.send('Unknown IdP: ' + domain, 400);
+    }
+
+    var exp = new Date();
+    exp.setSeconds(exp.getSeconds() + params.duration);
+
+    crypto.certify(HOSTNAME, params.email, params.publicKey, exp, record, function (err, cert) {
+      if (err) {
+        res.send(err, 500);
+      } else {        
+        res.send(JSON.stringify({certificate: cert}), {"Content-Type": "application/json"});
+      }
+    });
+  });
+});          
 
 app.use(express.static(__dirname + "/website"));
 app.use(express.static(__dirname + "/idps"));
