@@ -19,7 +19,7 @@
             }
 
         });
-    }    
+    }
 
     function putWellKnown(idp, wellKnown) {
         $.ajax({
@@ -46,6 +46,7 @@
         $('[name=domain]', form).val(idp.domain);
         $('[name=password]', form).val(idp.password);
         $('.domain-display .domain', form).text(idp.domain);
+        $('.domain-display .example_email', form).text("test@" + idp.domain + ".testidp.org");
         $('.domain-display .created', form).text(time);
         $('#current-idps').append(form);
         putWellKnown(idp, $('textarea', form).val());
