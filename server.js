@@ -4,6 +4,7 @@ var  crypto = require('./lib/crypto.js'),
          db = require('./lib/db.js'),
     express = require('express'),
    nunjucks = require('nunjucks'),
+       path = require('path'),
          qs = require('qs'),
         Seq = require('seq'),
   wellKnown = require('./lib/wellknown.js'),
@@ -15,7 +16,8 @@ winston.handleExceptions(new winston.transports.Console({ colorize: true, json: 
 */
 
 var app = express.createServer();
-new nunjucks.Environment(new nunjucks.FileSystemLoader('views')).express(app);
+var views = path.join(__dirname, 'views');
+new nunjucks.Environment(new nunjucks.FileSystemLoader(views)).express(app);
 // limit post bodies to 10kb
 app.use(express.limit("10kb"));
 
