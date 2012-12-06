@@ -46,6 +46,19 @@
       put(idp, {env: envUrl}, 'env');
     }
 
+    function deleteIdp(idp, cb) {
+      $.ajax({
+        url: '/api/' + idp.domain,
+        headers: {
+         'X-Password': idp.password
+        },
+        type: 'DELETE',
+        dataType: 'json',
+        success: cb,
+        error: handleError('DELETE'),
+      });
+    }
+
     $('#build-idp, #add-idp').click(function (e) {
       e.preventDefault();
       createIdP(function (idp) {
@@ -85,6 +98,19 @@
       showInteractive();
     });
 
+    $('#current-idps').click(function (e) {
+      if (! $(e.target).hasClass('btn-danger')) return;
+      e.preventDefault();
+      var form = $(e.target).parents('form');
+      var domain = $('[name=domain]', form).val();
+      if (idps[domain]) {
+        deleteIdp(idps[domain], function () {
+          $(form).parent().hide();
+          delete idps[domain];
+        });
+      }
+    });
+
     $('#current-idps').submit(function (e) {
         e.preventDefault();
         var form = $(e.target);
@@ -95,12 +121,12 @@
         if (idps[domain]) {
           putWellKnown(idps[domain], wellKnown);
           var envUrl = $('[name=env_url]', form).val();
-	  if (envUrl.indexOf('http') === 0 &&
-	      envUrl[envUrl.length -1] === '/') {
+          if (envUrl.indexOf('http') === 0 &&
+              envUrl[envUrl.length -1] === '/') {
             putEnv(idps[domain], envUrl);
-	  } else {
-	    $('#env-error').modal()
-	  }
+          } else {
+            $('#env-error').modal()
+          }
         } else {
           alert('Error: no ' + domain + ' in memory');
         }
