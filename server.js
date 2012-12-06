@@ -209,6 +209,7 @@ app.get('/noauth/prov.html', withDomain, function (req, res) {
 });
 
 app.use(express.static(__dirname + "/website"));
+app.use(express.static(__dirname + "/idps"));
 
 // handle starting from the command line or the test harness
 if (process.argv[1] === __filename) {
