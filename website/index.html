@@ -122,9 +122,9 @@
               </div>
             </div>
             <div class="control-group">
-              <div class="control-label">Custom Headers</div>
-              <div class="controls"><a href="#addHeader" role="button" class="btn-link" data-toggle="modal">Add Custom HTTP Header</a></div>
-              <!-- TODO show header name and value added from modal dialog -->
+              <div class="control-label">Custom Headers</div>	      
+              <div class="controls"><a href="#addHeader" role="button" class="add-headers btn-link" data-toggle="modal">Add Custom HTTP Header</a><dl></dl></div>
+	      
             </div>
             <div class="control-group">                  
               <div class="controls"><button class="btn-primary btn-large">Update IdP</button></div>
@@ -144,9 +144,8 @@
         </div>
         <div class="modal-body">
           <p>You're IdP's <code>/.well-known/browserid</code> will be served with this custom header.</p>
-          <!-- TODO add header name and value collection -->
-          <input type="text" placeholder="HTTP Header Name" />
-          <input type="text" placeholder="HTTP Header Value" />
+          <input type="text" name="header-name" placeholder="HTTP Header Name" />
+          <input type="text" name="header-value" placeholder="HTTP Header Value" />
         </div>
         <div class="modal-footer">
           <a href="#" class="btn .cancel">Close</a>

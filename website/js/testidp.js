@@ -46,6 +46,12 @@
       put(idp, {env: envUrl}, 'env');
     }
 
+    function putHeaders(idp, name, value, cb) {
+      var headers = {};
+      headers[name] = value;
+      put(idp, JSON.stringify(headers), 'headers', cb);
+    }
+
     function deleteIdp(idp, cb) {
       $.ajax({
         url: '/api/' + idp.domain,
@@ -132,10 +138,31 @@
         }
     });
 
+  var idpFocusedFromHeaders;
+  var formFocusedFromHeaders;
+  $('#current-idps').click(function (e) {
+    if (!$(e.target).hasClass('add-headers')) return;
+    e.preventDefault();
+    idpFocusedFromHeaders = undefined;
+    formFocusedFromHeaders = undefined;
+    var form = formFocusedFromHeaders = $(e.target).parents('form');
+    var domain = $('[name=domain]', form).val();
+    if (idps[domain]) idpFocusedFromHeaders = idps[domain];
+  });
+
     $('#addHeader .btn-primary').click(function (e) {
       e.preventDefault();
-        alert('TODO: save headers');
-        $('#addHeader').modal('hide');
+      var headerName = $('[name=header-name]').val();
+      var headerValue = $('[name=header-value]').val();
+      $('[name=header-name]').val('');
+      $('[name=header-value]').val('');
+      $('#addHeader').modal('hide');
+      if (idpFocusedFromHeaders) {
+        putHeaders(idpFocusedFromHeaders, headerName, headerValue, function () {
+          $('dl', formFocusedFromHeaders).append('<dt>' + headerName + '</dt><dd>' +
+                                                 headerValue + '</dd>');
+        });
+      }
     });
 
 })();
