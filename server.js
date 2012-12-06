@@ -1,12 +1,13 @@
 #!/usr/bin/env node
 
-var express = require('express'),
-    winston = require('winston'),
+var  crypto = require('./lib/crypto.js'),
          db = require('./lib/db.js'),
-     crypto = require('./lib/crypto.js'),
+    express = require('express'),
+   nunjucks = require('nunjucks'),
          qs = require('qs'),
         Seq = require('seq'),
-  wellKnown = require('./lib/wellknown.js');
+  wellKnown = require('./lib/wellknown.js'),
+    winston = require('winston');
 
 /*
 winston.exitOnError = false;
@@ -14,7 +15,7 @@ winston.handleExceptions(new winston.transports.Console({ colorize: true, json: 
 */
 
 var app = express.createServer();
-
+new nunjucks.Environment(new nunjucks.FileSystemLoader('views')).express(app);
 // limit post bodies to 10kb
 app.use(express.limit("10kb"));
 
@@ -67,12 +68,19 @@ function checkAuth(req, res, next) {
 }
 
 function withDomain(req, res, next) {
-  db.getDomain(req.params.domain, function(err, record) {
+  var localDomain = '';
+  if (req.params.domain) {
+    localDomain = req.params.domain;
+  } else if (req.headers.host) {
+    localDomain = req.headers.host.split('.')[0];
+  }
+  db.getDomain(localDomain, function(err, record) {
     if (err) {
       res.fail("database error: " + err);
     } else if (!record) {
       res.fail("no such domain", 404);
     } else {
+      record.domain = localDomain;
       req.domain = record;
       next();
     }
@@ -80,13 +88,16 @@ function withDomain(req, res, next) {
 }
 
 app.get('/api/domain', function(req, res) {
+  var params = qs.parse(req.query);
   Seq()
     .seq(function() {
       // generate a keypair for the domain
       crypto.genKeyPair(this);
     }).flatten()
     .seq(function(keyPair) {
-      db.newDomain(keyPair, wellKnown.generate(keyPair.publicKey), this);
+      var envUrl = 'https://login.persona.org/';
+      if (params.env) envUrl = params.env;
+      db.newDomain(keyPair, wellKnown.generate(keyPair.publicKey), envUrl, this);
     })
     .seq(function(details) {
       details.ok = true;
@@ -181,10 +192,19 @@ app.post('/auth/certify', function (req, res) {
       }
     });
   });
-});          
+});
+
+app.get('/noauth/auth.html', withDomain, function (req, res) {
+  res.render('noauth/auth.html', req.domain);
+});
+
+app.get('/noauth/prov.html', withDomain, function (req, res) {
+  res.render('noauth/prov.html', {
+    envUrl: req.domain.env
+  });
+});
 
 app.use(express.static(__dirname + "/website"));
-app.use(express.static(__dirname + "/idps"));
 
 // handle starting from the command line or the test harness
 if (process.argv[1] === __filename) {
