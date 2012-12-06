@@ -35,3 +35,4 @@ body {
     margin-top: 28px;
 }
 
+#current-idps textarea, #current-idps input[type=text] { min-width: 300px; }

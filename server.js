@@ -112,6 +112,12 @@ app.put('/api/:domain/\.?well-known', withDomain, checkAuth, function(req, res) 
   res.ok();
 });
 
+app.put('/api/:domain/env', withDomain, checkAuth, function(req, res) {
+  var params = qs.parse(req.body);
+  req.domain.env = params.env;
+  res.ok();
+});
+
 app.put('/api/:domain/headers', withDomain, checkAuth, function(req, res) {
   var kv = null;
   try {
@@ -199,9 +205,7 @@ app.get('/noauth/auth.html', withDomain, function (req, res) {
 });
 
 app.get('/noauth/prov.html', withDomain, function (req, res) {
-  res.render('noauth/prov.html', {
-    envUrl: req.domain.env
-  });
+  res.render('noauth/prov.html', req.domain);
 });
 
 app.use(express.static(__dirname + "/website"));

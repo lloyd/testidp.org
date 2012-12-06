@@ -108,9 +108,13 @@
               <div class="controls"><span class="example_email">test@smokycheese-34423423.testidp.org</span></div>
             </div>
             <div class="control-group">
+              <label class="control-label">Environment:</label>
+              <div class="controls"><input type="text" name="env_url" value="https://login.persona.org/" /></div>
+            </div>            
+            <div class="control-group">
               <label class="control-label">/.well-known/browserid</label>
               <div  class="controls">
-                <textarea rows="6">{
+                <textarea rows="6" cols="80">{
   "public-key": "<TEST IDP PROVIDED>",
   "authentication": "/noauth/auth.html",
   "provisioning": "/noauth/prov.html"
@@ -147,6 +151,17 @@
         <div class="modal-footer">
           <a href="#" class="btn .cancel">Close</a>
           <a href="#" class="btn btn-primary">Save changes</a>
+        </div>
+      </div>
+
+      <div id="env-error" class="modal fade hide">
+        <div class="alert-block alert-error modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="alert-heading">Environment URL Error</h4>
+        </div>
+	<div class="modal-body">
+          <p>You <strong>must</strong> have a protocol and end in a <code>/</code>!</p>
+          <p>Example: <code>http://foobar.com:8080/</code></p>
         </div>
       </div>
     </div><!-- #interactive -->

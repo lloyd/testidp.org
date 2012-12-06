@@ -8,8 +8,9 @@
     var idps = {};
 
     function createIdP (cb) {
+        var env = encodeURIComponent('https://login.persona.org/');
         $.ajax({
-            url: '/api/domain',
+          url: '/api/domain?env=' + env,
             type: 'GET',
             dataType: 'json',
             error: handleError('GET /api/domain'),
@@ -21,20 +22,30 @@
         });
     }
 
-    function putWellKnown(idp, wellKnown) {
-        $.ajax({
-            url: '/api/' + idp.domain + '/well-known',
-            headers: {
-                'X-Password': idp.password
-            },
-            type: 'PUT',
-            dataType: 'json',
-            data: wellKnown,
-            error: handleError('PUT /'),
-        });
+    function put(idp, params, api, successCb, errorCb) {
+      successCb = successCb || function () {};
+      errorCb = errorCb || handleError('PUT ' + api);
+      $.ajax({
+        url: '/api/' + idp.domain + '/' + api,
+        headers: {
+         'X-Password': idp.password
+        },
+        type: 'PUT',
+        dataType: 'json',
+        data: params,
+        success: successCb,
+        error: errorCb,
+      });
     }
 
-    //    putWellKnown(idp, {disable: true});
+    function putWellKnown(idp, wellKnown) {
+      put(idp, wellKnown, 'well-known');
+    }
+
+    function putEnv(idp, envUrl) {
+      put(idp, {env: envUrl}, 'env');
+    }
+
     $('#build-idp, #add-idp').click(function (e) {
       e.preventDefault();
       createIdP(function (idp) {
@@ -82,8 +93,14 @@
         var wellKnown = $('textarea', form).val();
 
         if (idps[domain]) {
-          console.log('putting', idps[domain], wellKnown);
           putWellKnown(idps[domain], wellKnown);
+          var envUrl = $('[name=env_url]', form).val();
+	  if (envUrl.indexOf('http') === 0 &&
+	      envUrl[envUrl.length -1] === '/') {
+            putEnv(idps[domain], envUrl);
+	  } else {
+	    $('#env-error').modal()
+	  }
         } else {
           alert('Error: no ' + domain + ' in memory');
         }
