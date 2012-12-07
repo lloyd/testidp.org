@@ -1,5 +1,5 @@
 navigator.id.beginProvisioning(function(email, certDuration) {
-  if (window.sessionStorage.getItem('authenticated') {
+  if (window.sessionStorage.getItem('authenticated')) {
     navigator.id.genKeyPair(function(publicKey) {
       $.ajax({
         url: '/auth/certify',
