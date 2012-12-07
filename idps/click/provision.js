@@ -19,6 +19,6 @@ navigator.id.beginProvisioning(function(email, certDuration) {
       });
     });
   } else {
-    navigator.id.raiseProvisioningFailure('user is not authenticated');
+    navigator.id.raiseProvisioningFailure('user is not authenticated as target user');
   }
 });
