@@ -1,0 +1,8 @@
+{%  extends "shell_layout.html" %}
+{% block title %}No Auth Auth{% endblock %}
+{% block content %}
+<blink>Authenticating on {{ domain }}</blink>
+<button id="login">login</button>
+<script src="{{ env }}authentication_api.js"></script>
+<script src="authenticate.js"></script>
+{% endblock %}

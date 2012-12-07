@@ -211,6 +211,14 @@ app.get('/noauth/prov.html', withDomain, function (req, res) {
   res.render('noauth/prov.html', req.domain);
 });
 
+app.get('/click/auth.html', withDomain, function (req, res) {
+  res.render('click/auth.html', req.domain);
+});
+
+app.get('/click/prov.html', withDomain, function (req, res) {
+  res.render('click/prov.html', req.domain);
+});
+
 app.use(express.static(__dirname + "/website"));
 app.use(express.static(__dirname + "/idps"));
 
