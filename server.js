@@ -99,6 +99,7 @@ app.get('/api/domain', function(req, res) {
     .seq(function(keyPair) {
       var envUrl = 'https://login.persona.org/';
       if (params.env) envUrl = params.env;
+      if (envUrl.substr(envUrl.length - 1) !== '/') envUrl = envUrl + '/';
       db.newDomain(keyPair, wellKnown.generate(keyPair.publicKey), envUrl, this);
     })
     .seq(function(details) {
